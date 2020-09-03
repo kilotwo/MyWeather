@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    <dbname value ="MyWeatherApp"/>
+    <version value="1"/>
+    <list>
+        <mapping class="com.wz.myweatherapp.db.County"/>
+        <mapping class="com.wz.myweatherapp.db.City"/>
+        <mapping class="com.wz.myweatherapp.db.Province"/>
+    </list>
+</litepal>
