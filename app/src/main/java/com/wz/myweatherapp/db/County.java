@@ -2,6 +2,9 @@ package com.wz.myweatherapp.db;
 
 import org.litepal.crud.DataSupport;
 
+/**
+ * 地区/县信息表
+ */
 public class County extends DataSupport {
         private int id;
         private String countyName;//县名

@@ -18,6 +18,10 @@ public class Utility {
     public static boolean handleProvinceResponse(String response){
         if (!TextUtils.isEmpty(response)) {
             try {
+                //可以看到,解析JSON的代码非常简单,由于在服务器中定义的是一个JSON数组,
+                //因此这里首先是将服务器返回的数据传入到了一个JSONArray对象中。然后循环遍历这个JSONArray,
+                // 从中取出的每一个元素都是一个JSONArray对象,每个JSONArray对象中又会包含id、name和 version这些数据。
+                //接下来只需要调用 getstring()方法将这些数据取出,并打印出来即可。
                 //先使用JSONArray 和 JSONObject将数据解析
                 JSONArray allProvince = new JSONArray(response);
                 for (int i = 0; i < allProvince.length(); i++) {
@@ -81,10 +85,5 @@ public static boolean handleCountyResponse(String response ,int cityId){
     }
     return false;
 }
-
-
-
-
-
 
 }

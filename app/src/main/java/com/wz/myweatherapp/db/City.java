@@ -2,6 +2,9 @@ package com.wz.myweatherapp.db;
 
 import org.litepal.crud.DataSupport;
 
+/**
+ * 城市信息表
+ */
 public class City extends DataSupport {
     private int id; //字段
     private String cityName; //城市名称
