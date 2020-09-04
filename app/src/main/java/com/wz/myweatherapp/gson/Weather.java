@@ -15,10 +15,10 @@ public class Weather {
     现在所有的GSON实体类都定义好了,接下来我们开始编写天气界面。
      */
     public String status;
-    public Basic Basic;
-    public AQI AQI;
-    public Now Now;
-    public Suggestion Suggestion;
+    public Basic basic;
+    public AQI aqi;
+    public Now now;
+    public Suggestion suggestion;
 
     @SerializedName("daily_forecast")
     public List<Forecast> mForecastList;

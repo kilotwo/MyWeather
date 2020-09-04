@@ -2,9 +2,11 @@ package com.wz.myweatherapp.util;
 
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
 import com.wz.myweatherapp.db.City;
 import com.wz.myweatherapp.db.County;
 import com.wz.myweatherapp.db.Province;
+import com.wz.myweatherapp.gson.Weather;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -85,5 +87,21 @@ public static boolean handleCountyResponse(String response ,int cityId){
     }
     return false;
 }
+public static Weather handleWeatherResponse(String response){
+    /*
+    可以看到, handleWeatherResponse()方法中先是通过jsonObject和jsonArray将天气
+        数据中的主体内容解析出来,即如下内容
 
+     */
+    try {
+        JSONObject jsonObject = new JSONObject(response);
+        JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+        String weatherContent = jsonArray.getJSONObject(0).toString();
+        return new Gson().fromJson(weatherContent,Weather.class);
+    } catch (JSONException e) {
+        e.printStackTrace();
+
+    }
+        return null;
+}
 }
