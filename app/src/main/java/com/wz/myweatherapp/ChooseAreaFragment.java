@@ -3,6 +3,7 @@ package com.wz.myweatherapp;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,6 +63,8 @@ public class ChooseAreaFragment extends Fragment {
     private List<Province>provinceList;
     private List<City>cityList;
     private List<County>countyList;
+
+    private static final String TAG = "ChooseAreaFragment";
     @Nullable
     @Override
      public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -108,11 +111,26 @@ public class ChooseAreaFragment extends Fragment {
                     selectedCity = cityList.get(pos);
                     queryCounty();
                 }else if (currentLevel == LEVEL_COUNTY){
+                    //非常简单,这里在 onitemclick()方法中加入了一个if判断,如果当前级别是 LEVEL
+                    //COUNTY,就启动 WeatherActivity,并把当前选中县的天气i传递过去。
                     String weatherId = countyList.get(pos).getWeatherId();
-                    Intent intent = new Intent(getActivity(),WeatherActivity.class);
-                    intent.putExtra("weather_id",weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    //这里使用了一个Java中的小技巧, instanceof关键字可以用来判断一个对象是否属于某
+                    //个类的实例。我们在碎片中调用 getActivity()方法,然后配合 instanceof关键字,就能轻
+                    //松判断出该碎片是在 MainActivity当中,还是在 WeatherActivity当中。如果是在 MainActivity当
+                    //中,那么处理逻辑不变。如果是在 WeatherActivity当中,那么就关闭滑动菜单,显示下拉刷新进
+                    //度条,然后请求新城市的天气信息
+                    if(getActivity() instanceof  MainActivity){
+                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                        intent.putExtra("weather_id",weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if (getActivity() instanceof WeatherActivity){
+                       WeatherActivity activity = (WeatherActivity) getActivity();
+                       activity.mDrawerLayout.closeDrawers();
+                       activity.mSwipeRefreshLayout.setRefreshing(true);
+                       activity.requestWeather(weatherId);
+                       //Log.d(TAG, "onItemClick: "+"getActivity() instanceof WeatherActivity"+weatherId);
+                    }
                 }
             }
         });

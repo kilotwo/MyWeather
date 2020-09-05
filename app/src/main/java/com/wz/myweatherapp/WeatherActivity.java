@@ -5,8 +5,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -15,6 +17,9 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.wz.myweatherapp.gson.Forecast;
@@ -46,6 +51,11 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView mSportText;
 
     private ImageView bingPicImg;
+
+    public SwipeRefreshLayout mSwipeRefreshLayout;
+
+    public DrawerLayout mDrawerLayout;
+    private Button navButton;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,23 +82,47 @@ public class WeatherActivity extends AppCompatActivity {
         mSportText = findViewById(R.id.sport_text);
 
         bingPicImg = findViewById(R.id.bing_pic_img);
-//这个活动中的代码也比较长,我们还是一步步梳理下。在 on create()方法中仍然先是去获
+
+
+        mSwipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+
+
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        navButton = findViewById(R.id.nav_button);
+        navButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDrawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+//这个活动中的代码也比较长,我们还是一步步梳理下。在 oncreate()方法中仍然先是去获
 //取一些控件的实例,然后会尝试从本地缓存中读取天气数据。那么第一次肯定是没有缓存的,因
 //此就会从 Intent中取出天气id,并调用 requestWeather()方法来从服务器请求天气数据。注意,
 //请求数据的时候先将 ScrollⅤview进行隐藏,不然空数据的界面看上去会很奇怪。
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
+        //----------------------------------------------------------------------
+
+        final String weatherId;
         if (weatherString != null){
             //有缓存直接解析天气数据
             Weather weather = Utility.handleWeatherResponse(weatherString);
+            weatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
         }else{
             //无缓存去服务器查询天气
-            String weatherId = getIntent().getStringExtra("weather_id");
+            weatherId = getIntent().getStringExtra("weather_id");
             mWeatherLayout.setVisibility(View.INVISIBLE);
             //请求天气
             requestWeather(weatherId);
         }
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(weatherId);
+            }
+        });
         String bingPic = prefs.getString("bing_pic", null);
         if (bingPic!=null){
             Glide.with(this).load(bingPic).into(bingPicImg);
@@ -186,7 +220,7 @@ handleWeatherResponse()方法将返回的JSON数据转换成 Weather对象,再�
 
      */
 
-    private void requestWeather(final String weatherId) {
+    public void requestWeather(final String weatherId) {
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId +"&key=755a053d247341699ebbe941099d994f";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
@@ -195,6 +229,7 @@ handleWeatherResponse()方法将返回的JSON数据转换成 Weather对象,再�
                         @Override
                         public void run() {
                             Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+                            mSwipeRefreshLayout.setRefreshing(false);
                         }
                     });
             }
@@ -216,6 +251,9 @@ handleWeatherResponse()方法将返回的JSON数据转换成 Weather对象,再�
                             Toast.makeText(WeatherActivity.this, "获取天气数据失败1", Toast.LENGTH_SHORT).show();
 
                         }
+                        //另外不要忘记,当请求结束后,还需要调用 SwipeRefreshLayout的 setRefreshing()方法
+                        //并传入 false,用于表示刷新事件结束,并隐藏刷新进度条。
+                        mSwipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
