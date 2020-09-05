@@ -58,6 +58,8 @@ public class WeatherActivity extends AppCompatActivity {
 
     public DrawerLayout mDrawerLayout;
     private Button navButton;
+
+    private String mWeatherId;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +94,9 @@ public class WeatherActivity extends AppCompatActivity {
 
         mDrawerLayout = findViewById(R.id.drawer_layout);
         navButton = findViewById(R.id.nav_button);
+
+
+
         navButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -106,23 +111,23 @@ public class WeatherActivity extends AppCompatActivity {
         String weatherString = prefs.getString("weather", null);
         //----------------------------------------------------------------------
 
-        final String weatherId;
+       // final String weatherId;
         if (weatherString != null){
             //有缓存直接解析天气数据
             Weather weather = Utility.handleWeatherResponse(weatherString);
-            weatherId = weather.basic.weatherId;
+            mWeatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
         }else{
             //无缓存去服务器查询天气
-            weatherId = getIntent().getStringExtra("weather_id");
+            mWeatherId = getIntent().getStringExtra("weather_id");
             mWeatherLayout.setVisibility(View.INVISIBLE);
             //请求天气
-            requestWeather(weatherId);
+            requestWeather(mWeatherId);
         }
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                requestWeather(weatherId);
+                requestWeather(mWeatherId);
             }
         });
         String bingPic = prefs.getString("bing_pic", null);
@@ -209,8 +214,8 @@ Weather Actiⅳvity时,由于缓存已经存在了,因此会直接解析并显�
         mCarWashText.setText(carwash);
         mSportText.setText(sport);
         mWeatherLayout.setVisibility(View.VISIBLE);
-        Intent intent = new Intent(this,AutoUpdateService.class);
-        startActivity(intent);
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
      }
 
     /*
@@ -250,8 +255,8 @@ handleWeatherResponse()方法将返回的JSON数据转换成 Weather对象,再�
                             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
                             editor.putString("weather",responseText);
                             editor.apply();
+                            mWeatherId = weather.basic.weatherId;
                             showWeatherInfo(weather);
-
 
                         }else {
                             Toast.makeText(WeatherActivity.this, "获取天气数据失败1", Toast.LENGTH_SHORT).show();
