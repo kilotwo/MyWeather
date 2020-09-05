@@ -1,5 +1,6 @@
 package com.wz.myweatherapp;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.wz.myweatherapp.gson.Forecast;
 import com.wz.myweatherapp.gson.Weather;
+import com.wz.myweatherapp.service.AutoUpdateService;
 import com.wz.myweatherapp.util.HttpUtil;
 import com.wz.myweatherapp.util.Utility;
 
@@ -207,6 +209,8 @@ Weather Actiⅳvity时,由于缓存已经存在了,因此会直接解析并显�
         mCarWashText.setText(carwash);
         mSportText.setText(sport);
         mWeatherLayout.setVisibility(View.VISIBLE);
+        Intent intent = new Intent(this,AutoUpdateService.class);
+        startActivity(intent);
      }
 
     /*
@@ -247,6 +251,8 @@ handleWeatherResponse()方法将返回的JSON数据转换成 Weather对象,再�
                             editor.putString("weather",responseText);
                             editor.apply();
                             showWeatherInfo(weather);
+
+
                         }else {
                             Toast.makeText(WeatherActivity.this, "获取天气数据失败1", Toast.LENGTH_SHORT).show();
 
